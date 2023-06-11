@@ -1,13 +1,18 @@
-var data =  require("./fakeData");
+var data = require("./fakeData");
+var validatePermissionsMiddleware = require("./permissionsMiddleware");
 
-module.exports =  function(req, res) {
-  
-    var id =  req.query.id;
+module.exports = function (req, res) {
+  const userId = req.query.id;
+  const permission = req.query.permission;
 
-    const reg = data.find(d => id == id);
-    reg.name = req.body.name;
-    reg.job = req.body.job;
+  validatePermissionsMiddleware(req, res, permission, () => {
+    const userIndex = data.findIndex((user) => user.id === userId);
 
-    res.send(reg);
+    if (userIndex === -1) return res.status(404).send("Usuário não encontrado");
 
+    data[userIndex].name = req.body.name;
+    data[userIndex].job = req.body.job;
+
+    res.send(data[userIndex]);
+  });
 };
